@@ -16,15 +16,10 @@ class GestureCatcher extends StatelessWidget {
     return RawGestureDetector(
       key: ValueKey(pointerKindsToCatch),
       gestures: {
-        GestureCatcherRecognizer:
-            GestureRecognizerFactoryWithHandlers<GestureCatcherRecognizer>(
-          () => GestureCatcherRecognizer(
+        ImmediateMultiDragGestureRecognizer:
+          GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(() => ImmediateMultiDragGestureRecognizer(
             debugOwner: this,
-            pointerKindsToCatch: pointerKindsToCatch,
-          ),
-          (GestureCatcherRecognizer instance) {
-          },
-        )
+          ), (instance) { })
       },
       child: child,
     );
