@@ -21,11 +21,17 @@ class ScribbleSketch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: ScribblePainter(
-        sketch: sketch,
-        scaleFactor: scaleFactor,
-      ),
+    return LayoutBuilder(
+      builder: (context, contraints) {
+        Size canvasSize = Size(contraints.maxWidth, contraints.maxHeight);
+        return CustomPaint(
+          painter: ScribblePainter(
+            sketch: sketch,
+            scaleFactor: scaleFactor,
+            canvasSize: canvasSize,
+          ),
+        );
+      }
     );
   }
 }

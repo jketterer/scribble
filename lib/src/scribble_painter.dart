@@ -6,10 +6,12 @@ class ScribblePainter extends CustomPainter with SketchLinePainter {
   ScribblePainter({
     required this.sketch,
     required this.scaleFactor,
+    required this.canvasSize,
   });
 
   final Sketch sketch;
   final double scaleFactor;
+  final Size canvasSize;
 
   List<SketchLine> get lines => sketch.lines;
 
@@ -18,7 +20,7 @@ class ScribblePainter extends CustomPainter with SketchLinePainter {
     Paint paint = Paint()..style = PaintingStyle.fill;
 
     for (int i = 0; i < lines.length; ++i) {
-      final path = getPathForLine(lines[i]);
+      final path = getPathForLine(lines[i], canvasSize, scaleFactor: scaleFactor);
       if (path == null) {
         continue;
       }
@@ -29,14 +31,20 @@ class ScribblePainter extends CustomPainter with SketchLinePainter {
 
   @override
   bool shouldRepaint(ScribblePainter oldDelegate) {
-    return oldDelegate.sketch != sketch || oldDelegate.scaleFactor != scaleFactor;
+    return oldDelegate.sketch != sketch ||
+        oldDelegate.scaleFactor != scaleFactor;
   }
 }
 
 mixin SketchLinePainter {
-  Path? getPathForLine(SketchLine line, {double scaleFactor = 1.0}) {
-    final simulatePressure = line.points.isNotEmpty && line.points.every((p) => p.pressure == line.points.first.pressure);
-    final points = line.points.map((point) => pf.Point(point.x, point.y, point.pressure)).toList();
+  Path? getPathForLine(SketchLine line, Size size, {double scaleFactor = 1.0}) {
+    final simulatePressure = line.points.isNotEmpty &&
+        line.points.every((p) => p.pressure == line.points.first.pressure);
+    final points = line.points
+        .map((point) => pf.Point(
+            point.x * size.width, point.y * size.height, point.pressure))
+            // point.x, point.y, point.pressure))
+        .toList();
     final outlinePoints = pf.getStroke(
       points,
       size: line.width * 2 * scaleFactor,

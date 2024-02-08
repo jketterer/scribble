@@ -29,6 +29,8 @@ abstract class ScribbleNotifierBase extends StateNotifier<ScribbleState> {
 
   void onPointerExit(PointerExitEvent event);
 
+  void setCanvasSize(Size size);
+
   /// Used to render the image to ByteData which can then be stored or reused
   /// for example in an [Image.memory] widget.
   ///
@@ -61,6 +63,10 @@ class ScribbleNotifier extends ScribbleNotifierBase
 
     /// Which pointers can be drawn with and are captured.
     ScribblePointerMode allowedPointersMode = ScribblePointerMode.all,
+
+    /// The size of the canvas. This should be updated whenever the canvas size
+    /// changes to ensure each SketchLine is saved correctly.
+    Size? canvasSize,
 
     /// How many states you want stored in the undo history, 30 by default.
     int maxHistoryLength = 30,
@@ -95,6 +101,8 @@ class ScribbleNotifier extends ScribbleNotifierBase
   /// The curve that's used to map pen pressure to the pressure value when
   /// recording.
   final Curve pressureCurve;
+
+  Size? canvasSize;
 
   /// The state of the sketch at this moment.
   ///
@@ -325,6 +333,11 @@ class ScribbleNotifier extends ScribbleNotifierBase
     );
   }
 
+  @override
+  void setCanvasSize(Size size) {
+    canvasSize = size;
+  }
+
   ScribbleState _addPoint(PointerEvent event, ScribbleState s) {
     if (s is Erasing || !s.active) return s;
     if (s is Drawing && s.activeLine == null) return s;
@@ -347,7 +360,7 @@ class ScribbleNotifier extends ScribbleNotifierBase
     return state.copyWith.sketch(
       lines: state.sketch.lines
           .where((l) => l.points.every((p) =>
-              (event.localPosition - p.asOffset).distance >
+              (event.localPosition - (Point(p.x * canvasSize!.width, p.y * canvasSize!.height)).asOffset).distance >
               l.width + state.selectedWidth))
           .toList(),
     );
@@ -360,8 +373,8 @@ class ScribbleNotifier extends ScribbleNotifierBase
         : (event.pressure - event.pressureMin) /
             (event.pressureMax - event.pressureMin);
     return Point(
-      event.localPosition.dx,
-      event.localPosition.dy,
+      event.localPosition.dx / canvasSize!.width,
+      event.localPosition.dy / canvasSize!.height,
       pressure: pressureCurve.transform(p),
     );
   }

@@ -49,21 +49,28 @@ class _ScribbleState extends State<Scribble> {
         final drawCurrentTool = widget.drawPen && state is Drawing ||
             widget.drawEraser && state is Erasing;
         final child = SizedBox.expand(
-          child: CustomPaint(
-            foregroundPainter: ScribbleEditingPainter(
-              state: state,
-              drawPointer: widget.drawPen,
-              drawEraser: widget.drawEraser,
-            ),
-            child: RepaintBoundary(
-              key: widget.notifier.repaintBoundaryKey,
-              child: CustomPaint(
-                painter: ScribblePainter(
-                  sketch: state.sketch,
-                  scaleFactor: state.scaleFactor,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              Size canvasSize = Size(constraints.maxWidth, constraints.maxHeight);
+              widget.notifier.setCanvasSize(canvasSize);
+              return CustomPaint(
+                foregroundPainter: ScribbleEditingPainter(
+                  state: state,
+                  drawPointer: widget.drawPen,
+                  drawEraser: widget.drawEraser,
                 ),
-              ),
-            ),
+                child: RepaintBoundary(
+                  key: widget.notifier.repaintBoundaryKey,
+                  child: CustomPaint(
+                    painter: ScribblePainter(
+                      sketch: state.sketch,
+                      scaleFactor: state.scaleFactor,
+                      canvasSize: canvasSize,
+                    ),
+                  ),
+                ),
+              );
+            }
           ),
         );
         return !state.active

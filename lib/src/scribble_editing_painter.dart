@@ -22,7 +22,7 @@ class ScribbleEditingPainter extends CustomPainter with SketchLinePainter {
       erasing: (_) => null,
     );
     if (activeLine != null) {
-      final path = getPathForLine(activeLine, scaleFactor: state.scaleFactor);
+      final path = getPathForLine(activeLine, size, scaleFactor: state.scaleFactor);
       if (path != null) {
         paint.color = Color(activeLine.color);
         canvas.drawPath(path, paint);
@@ -39,8 +39,9 @@ class ScribbleEditingPainter extends CustomPainter with SketchLinePainter {
         erasing: (s) => const Color(0xFF000000),
       );
       paint.strokeWidth = 1;
+      Point pos = Point(state.pointerPosition!.x * size.width, state.pointerPosition!.y * size.height);
       canvas.drawCircle(
-        state.pointerPosition!.asOffset,
+        pos.asOffset,
         state.selectedWidth / state.scaleFactor,
         paint,
       );
